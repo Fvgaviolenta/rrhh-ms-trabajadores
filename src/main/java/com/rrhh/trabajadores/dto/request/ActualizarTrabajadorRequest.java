@@ -10,5 +10,6 @@ public record ActualizarTrabajadorRequest(
         String departamentoId,
         String cargoId,
         String jefaturaId,
-        BigDecimal diasVacacionesDisponibles
+        BigDecimal diasVacacionesDisponibles,
+        Boolean activo
 ) {}

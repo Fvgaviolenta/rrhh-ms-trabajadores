@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface TrabajadorRepository extends JpaRepository<Trabajador, String> {
     List<Trabajador> findByTenantIdAndActivoTrue(String tenantId);
+
+    List<Trabajador> findByTenantIdOrderByApellidoAscNombreAsc(String tenantId);
     Optional<Trabajador> findByIdAndTenantId(String id, String tenantId);
     boolean existsByTenantIdAndRutTrabajador(String tenantId, String rut);
 }

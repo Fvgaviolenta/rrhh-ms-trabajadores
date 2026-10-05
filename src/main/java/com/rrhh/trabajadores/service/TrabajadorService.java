@@ -45,7 +45,9 @@ public class TrabajadorService {
         if (Roles.TRABAJADOR.equals(authority)) {
             throw new DomainException(403, "Un trabajador no puede listar fichas de otros");
         }
-        return trabajadorRepository.findByTenantIdAndActivoTrue(actor.tenantId()).stream().map(this::toResponse).toList();
+        return trabajadorRepository.findByTenantIdOrderByApellidoAscNombreAsc(actor.tenantId()).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public TrabajadorResponse obtener(String trabajadorId) {
@@ -95,6 +97,10 @@ public class TrabajadorService {
         if (request.cargoId() != null) trabajador.setCargoId(request.cargoId());
         if (request.jefaturaId() != null) trabajador.setJefaturaId(request.jefaturaId());
         if (request.diasVacacionesDisponibles() != null) trabajador.setDiasVacacionesDisponibles(request.diasVacacionesDisponibles());
+        if (request.activo() != null) {
+            trabajador.setActivo(request.activo());
+            trabajador.setFechaDesvinculacion(Boolean.TRUE.equals(request.activo()) ? null : Instant.now());
+        }
         return toResponse(trabajadorRepository.save(trabajador));
     }
 
