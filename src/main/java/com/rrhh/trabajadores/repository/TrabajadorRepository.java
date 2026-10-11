@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TrabajadorRepository extends JpaRepository<Trabajador, String> {
+    List<Trabajador> findByTenantId(String tenantId);
     List<Trabajador> findByTenantIdAndActivoTrue(String tenantId);
 
     List<Trabajador> findByTenantIdOrderByApellidoAscNombreAsc(String tenantId);

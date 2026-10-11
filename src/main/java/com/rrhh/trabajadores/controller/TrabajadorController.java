@@ -31,6 +31,13 @@ public class TrabajadorController {
         return ApiResponse.ok(trabajadorService.listar(), "Trabajadores del tenant");
     }
 
+    @GetMapping("/plataforma/tenants/{tenant_id}/trabajadores")
+    @PreAuthorize("hasRole('OPERADOR_SAAS')")
+    public ApiResponse<List<TrabajadorResponse>> listarPorTenantPlataforma(
+            @PathVariable("tenant_id") String tenantId) {
+        return ApiResponse.ok(trabajadorService.listarPorTenantPlataforma(tenantId), "Trabajadores del tenant solicitado");
+    }
+
     @GetMapping("/trabajadores/{trabajador_id}")
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN_RRHH','JEFATURA','TRABAJADOR')")
     public ApiResponse<TrabajadorResponse> obtener(@PathVariable("trabajador_id") String trabajadorId) {

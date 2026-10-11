@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface CargoRepository extends JpaRepository<Cargo, String> {
     List<Cargo> findByTenantId(String tenantId);
     Optional<Cargo> findByIdAndTenantId(String id, String tenantId);
+    Optional<Cargo> findByTenantIdAndNombreCargoIgnoreCase(String tenantId, String nombreCargo);
 }
