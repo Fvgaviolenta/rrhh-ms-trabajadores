@@ -10,9 +10,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestJwtConfig.class)
+// Los tokens los resuelve TestJwtConfig: "admin", "trabajador" y "otro-tenant".
 class TrabajadorControllerIT {
 
     @Autowired
@@ -29,27 +29,28 @@ class TrabajadorControllerIT {
 
     @Test
     void adminListaTrabajadoresDelTenant() throws Exception {
-        mockMvc.perform(get("/api/v1/trabajadores").with(adminJwt()))
+        mockMvc.perform(get("/api/v1/trabajadores").header("Authorization", "Bearer admin"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.datos.length()").value(1));
     }
 
     @Test
     void otroTenantNoVeFicha() throws Exception {
-        mockMvc.perform(get("/api/v1/trabajadores/ffffffff-ffff-ffff-ffff-ffffffffffff").with(otroTenantJwt()))
+        mockMvc.perform(get("/api/v1/trabajadores/ffffffff-ffff-ffff-ffff-ffffffffffff").header("Authorization", "Bearer otro-tenant"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void trabajadorNoListaTodos() throws Exception {
-        mockMvc.perform(get("/api/v1/trabajadores").with(trabajadorJwt()))
+        mockMvc.perform(get("/api/v1/trabajadores").header("Authorization", "Bearer trabajador"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
+    @Transactional // revierte el alta para no cambiar el conteo de adminListaTrabajadoresDelTenant
     void creaTrabajadorConRutUnico() throws Exception {
         mockMvc.perform(post("/api/v1/trabajadores")
-                        .with(adminJwt())
+                        .header("Authorization", "Bearer admin")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -63,24 +64,5 @@ class TrabajadorControllerIT {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.datos.tenant_id").value("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
-    }
-
-    private static RequestPostProcessor adminJwt() {
-        return jwt().jwt(b -> b.subject("a").claim("email", "admin.demo@rrhh.local")
-                .claim("custom:tenant_id", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                .claim("custom:role", "Admin de RRHH"));
-    }
-
-    private static RequestPostProcessor trabajadorJwt() {
-        return jwt().jwt(b -> b.subject("t").claim("email", "ana.perez@rrhh.local")
-                .claim("custom:tenant_id", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-                .claim("custom:role", "Trabajador")
-                .claim("custom:trabajador_id", "ffffffff-ffff-ffff-ffff-ffffffffffff"));
-    }
-
-    private static RequestPostProcessor otroTenantJwt() {
-        return jwt().jwt(b -> b.subject("b").claim("email", "admin.b@rrhh.local")
-                .claim("custom:tenant_id", "cccccccc-cccc-cccc-cccc-cccccccccccc")
-                .claim("custom:role", "Admin de RRHH"));
     }
 }
