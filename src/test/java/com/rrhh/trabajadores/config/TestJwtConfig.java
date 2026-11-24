@@ -18,6 +18,8 @@ import java.util.Map;
 public class TestJwtConfig {
     public static final String TENANT_DEMO = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
     public static final String TENANT_OTRO = "cccccccc-cccc-cccc-cccc-cccccccccccc";
+    /** Empresa del token "admin-suspendida"; TenantSuspendidoIT la crea en identity_tenant y la suspende. */
+    public static final String TENANT_SUSPENDIBLE = "99999999-9999-9999-9999-999999999999";
 
     @Bean
     @Primary
@@ -33,6 +35,17 @@ public class TestJwtConfig {
                         "email", "admin.b@rrhh.local",
                         "custom:tenant_id", TENANT_OTRO,
                         "custom:role", "Admin de RRHH");
+                case "admin-suspendida" -> Map.of(
+                        "email", "admin.suspendida@rrhh.local",
+                        "custom:tenant_id", TENANT_SUSPENDIBLE,
+                        "custom:role", "Admin de RRHH");
+                case "admin-plataforma" -> Map.of(
+                        "email", "owner@gmail.com",
+                        "custom:role", "AdminPlataforma");
+                case "admin-plataforma-con-tenant" -> Map.of(
+                        "email", "owner@gmail.com",
+                        "custom:tenant_id", TENANT_SUSPENDIBLE,
+                        "custom:role", "AdminPlataforma");
                 default -> Map.of(
                         "email", "admin.demo@rrhh.local",
                         "custom:tenant_id", TENANT_DEMO,
