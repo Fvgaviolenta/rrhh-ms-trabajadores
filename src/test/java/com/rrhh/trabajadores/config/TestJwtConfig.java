@@ -18,6 +18,12 @@ import java.util.Map;
 public class TestJwtConfig {
     public static final String TENANT_DEMO = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
     public static final String TENANT_OTRO = "cccccccc-cccc-cccc-cccc-cccccccccccc";
+    /** Empresa del token "admin-suspendida"; TenantSuspendidoIT la crea en identity_tenant y la suspende. */
+    /** custom:user_id del token "operador-grupo"; PlataformaAlcanceIT lo asigna a su grupo. */
+    public static final String OPERADOR_GRUPO_ID = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
+    /** Subject del token "operador-grupo-sin-claim" (sin custom:user_id): su fila se busca por cognito_sub. */
+    public static final String OPERADOR_SIN_CLAIM_SUB = "test-operador-grupo-sin-claim";
+    public static final String TENANT_SUSPENDIBLE = "99999999-9999-9999-9999-999999999999";
 
     @Bean
     @Primary
@@ -33,6 +39,28 @@ public class TestJwtConfig {
                         "email", "admin.b@rrhh.local",
                         "custom:tenant_id", TENANT_OTRO,
                         "custom:role", "Admin de RRHH");
+                case "admin-suspendida" -> Map.of(
+                        "email", "admin.suspendida@rrhh.local",
+                        "custom:tenant_id", TENANT_SUSPENDIBLE,
+                        "custom:role", "Admin de RRHH");
+                case "admin-plataforma" -> Map.of(
+                        "email", "owner@gmail.com",
+                        "custom:role", "AdminPlataforma");
+                case "admin-plataforma-con-tenant" -> Map.of(
+                        "email", "owner@gmail.com",
+                        "custom:tenant_id", TENANT_SUSPENDIBLE,
+                        "custom:role", "AdminPlataforma");
+                case "operador-grupo" -> Map.of(
+                        "email", "operador.grupo@rrhh.local",
+                        "custom:role", "OperadorSaaS",
+                        "custom:user_id", OPERADOR_GRUPO_ID);
+                case "operador-sin-grupo" -> Map.of(
+                        "email", "operador.solo@rrhh.local",
+                        "custom:role", "OperadorSaaS",
+                        "custom:user_id", "dddddddd-0000-0000-0000-000000000001");
+                case "operador-grupo-sin-claim" -> Map.of(
+                        "email", "operador.grupo@rrhh.local",
+                        "custom:role", "OperadorSaaS");
                 default -> Map.of(
                         "email", "admin.demo@rrhh.local",
                         "custom:tenant_id", TENANT_DEMO,

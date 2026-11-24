@@ -32,7 +32,7 @@ public class TrabajadorController {
     }
 
     @GetMapping("/plataforma/tenants/{tenant_id}/trabajadores")
-    @PreAuthorize("hasRole('OPERADOR_SAAS')")
+    @PreAuthorize("hasAnyRole('OPERADOR_SAAS','ADMIN_PLATAFORMA')")
     public ApiResponse<List<TrabajadorResponse>> listarPorTenantPlataforma(
             @PathVariable("tenant_id") String tenantId) {
         return ApiResponse.ok(trabajadorService.listarPorTenantPlataforma(tenantId), "Trabajadores del tenant solicitado");

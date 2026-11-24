@@ -29,19 +29,22 @@ public class TrabajadorService {
     private final CargoRepository cargoRepository;
     private final SuperadminTrabajadorRepository superadminTrabajadorRepository;
     private final TenantContext tenantContext;
+    private final AlcancePlataforma alcancePlataforma;
 
     public TrabajadorService(
             TrabajadorRepository trabajadorRepository,
             DepartamentoRepository departamentoRepository,
             CargoRepository cargoRepository,
             SuperadminTrabajadorRepository superadminTrabajadorRepository,
-            TenantContext tenantContext
+            TenantContext tenantContext,
+            AlcancePlataforma alcancePlataforma
     ) {
         this.trabajadorRepository = trabajadorRepository;
         this.departamentoRepository = departamentoRepository;
         this.cargoRepository = cargoRepository;
         this.superadminTrabajadorRepository = superadminTrabajadorRepository;
         this.tenantContext = tenantContext;
+        this.alcancePlataforma = alcancePlataforma;
     }
 
     public List<TrabajadorResponse> listar() {
@@ -59,7 +62,7 @@ public class TrabajadorService {
     }
 
     public List<TrabajadorResponse> listarPorTenantPlataforma(String tenantId) {
-        exigirOperadorSaas();
+        alcancePlataforma.exigir(tenantContext.current(), tenantId);
         return trabajadorRepository.findByTenantIdOrderByApellidoAscNombreAsc(tenantId).stream().map(this::toResponse).toList();
     }
 
@@ -150,12 +153,6 @@ public class TrabajadorService {
     private Trabajador buscar(String id, String tenantId) {
         return trabajadorRepository.findByIdAndTenantId(id, tenantId)
                 .orElseThrow(() -> new DomainException(404, "Trabajador no encontrado"));
-    }
-
-    private void exigirOperadorSaas() {
-        if (!Roles.OPERADOR_SAAS.equals(Roles.authorityFromClaim(tenantContext.current().role()))) {
-            throw new DomainException(403, "Acceso exclusivo para el operador SaaS");
-        }
     }
 
     private void validarQueAdminNoGestioneSuperadmin(TenantContext.AuthenticatedUser actor, String trabajadorId) {
